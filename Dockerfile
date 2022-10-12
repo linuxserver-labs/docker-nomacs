@@ -53,10 +53,13 @@ RUN \
   make && \
   make install && \
   echo "**** compile nomacs ****" && \
+  if [ -z "${APP_VERSION}" ]; then \
+    APP_VERSION=$(curl -sX GET https://api.github.com/repos/nomacs/nomacs/tags | jq -r '.[0] | .name'); \
+  fi && \
   mkdir -p /tmp/nomacs && \
   git clone --recurse-submodules https://github.com/nomacs/nomacs.git /tmp/nomacs && \
   cd /tmp/nomacs && \
-  git checkout 3.17.2206 && \
+  git checkout "${APP_VERSION}" && \
   mkdir -p /tmp/nomacs/build && \
   cd /tmp/nomacs/build && \
   cmake ../ImageLounge/. && \
