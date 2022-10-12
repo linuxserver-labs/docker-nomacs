@@ -71,6 +71,8 @@ services:
   nomacs:
     image: lscr.io/linuxserver-labs/nomacs:latest
     container_name: nomacs
+    security_opt:
+      - seccomp:unconfined #optional
     environment:
       - PUID=1000
       - PGID=1000
@@ -87,6 +89,7 @@ services:
 ```bash
 docker run -d \
   --name=nomacs \
+  --security-opt seccomp=unconfined `#optional` \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/London \
@@ -107,6 +110,7 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-e TZ=Europe/London` | Specify a timezone to use EG Europe/London. |
 | `-p 3000` | The webui port. |
 | `-v /config` | The folder on host you'd like the app data to reside in. |
+| `--security-opt seccomp=unconfined` | For Docker Engine only, many modern gui apps need this to function as syscalls are unkown to Docker. |
 
 ## Environment variables from files (Docker secrets)
 
