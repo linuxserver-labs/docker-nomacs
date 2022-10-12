@@ -36,7 +36,7 @@ Find us at:
 [![GitHub Release](https://img.shields.io/github/release/linuxserver-labs/docker-nomacs.svg?color=94398d&labelColor=555555&logoColor=ffffff&style=for-the-badge&logo=github)](https://github.com/linuxserver-labs/docker-nomacs/releases)
 [![GitHub Package Repository](https://img.shields.io/static/v1.svg?color=94398d&labelColor=555555&logoColor=ffffff&style=for-the-badge&label=linuxserver.io&message=GitHub%20Package&logo=github)](https://github.com/linuxserver-labs/docker-nomacs/packages)
 
-[nomacs](https://github.com/Taxel/nomacs) is a self-hosted application that adds a two-way-sync between trakt.tv and Plex Media Server. It requires a trakt.tv account but no Plex premium and no Trakt VIP subscriptions, unlike the Plex app provided by Trakt.
+[nomacs](https://github.com/nomacs/nomacs) is a free, open source image viewer, which supports multiple platforms. You can use it for viewing all common image formats including RAW and psd images.
 
 [![nomacs](https://nomacs.org/startpage/nomacs.svg)](https://github.com/nomacs/nomacs)
 
