@@ -34,6 +34,7 @@ RUN \
     qttools5-dev-tools && \
   echo "**** install runtime dependencies ****" && \
   apt-get install -y --no-install-recommends \
+    kimageformat-plugins \
     libexiv2-27 \
     libheif1 \
     libopencv-core4.5d \

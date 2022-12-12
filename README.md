@@ -221,4 +221,5 @@ Once registered you can define the dockerfile to use with `-f Dockerfile.aarch64
 
 ## Versions
 
+* **10.12.22:** - Add support for AVIF and JPEG XL.
 * **12.10.22:** - Initial Release.
