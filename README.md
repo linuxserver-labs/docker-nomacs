@@ -56,7 +56,7 @@ The architectures supported by this image are:
 
 ## Application Setup
 
-The webui will be accessible at http://SERVERIP:3001 or https://SERVERIP:3001
+The webui will be accessible at http://SERVERIP:3000 or https://SERVERIP:3001
 
 ### Options in all KasmVNC based GUI containers
 
