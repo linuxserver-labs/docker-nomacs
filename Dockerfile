@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-rdesktop-web:jammy
+FROM ghcr.io/linuxserver/baseimage-kasmvnc:ubuntujammy
 
 ARG BUILD_DATE
 ARG VERSION
@@ -67,6 +67,7 @@ RUN \
   make && \
   make install && \
   ldconfig && \
+  sed -i 's|</applications>|  <application title="nomacs \| Image Lounge" type="normal">\n    <maximized>yes</maximized>\n  </application>\n</applications>|' /etc/xdg/openbox/rc.xml && \
   echo "**** clean up ****" && \
   apt-get purge --auto-remove -y \
     build-essential \
