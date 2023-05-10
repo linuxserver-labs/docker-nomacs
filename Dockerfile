@@ -55,7 +55,7 @@ RUN \
   make install && \
   echo "**** compile nomacs ****" && \
   if [ -z "${APP_VERSION}" ]; then \
-    APP_VERSION=$(curl -sX GET https://api.github.com/repos/nomacs/nomacs/tags | jq -r '.[0] | .name'); \
+    APP_VERSION=$(curl -sX GET https://api.github.com/repos/nomacs/nomacs/commits/master | jq -r '. | .sha' | cut -c1-8); \
   fi && \
   mkdir -p /tmp/nomacs && \
   git clone --recurse-submodules https://github.com/nomacs/nomacs.git /tmp/nomacs && \
