@@ -8,7 +8,8 @@ LABEL maintainer="aptalca"
 
 ENV \
   DEBIAN_FRONTEND="noninteractive" \
-  HOME=/config
+  HOME=/config \
+  TITLE="nomacs"
 
 RUN \
   echo "**** install build dependencies ****" && \
