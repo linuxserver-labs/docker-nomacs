@@ -253,6 +253,7 @@ Once registered you can define the dockerfile to use with `-f Dockerfile.aarch64
 
 ## Versions
 
+* **11.02.24:** - Add PWA icon, rely on baseimage's fullscreen fix.
 * **10.05.23:** - Build commits from upstream master branch.
 * **27.03.23:** - Rebase to the new kasmvnc baseimage. Deprecate arm32v7 build as the new base does not support it.
 * **10.12.22:** - Add support for AVIF and JPEG XL.
