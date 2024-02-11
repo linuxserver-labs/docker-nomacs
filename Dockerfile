@@ -68,7 +68,6 @@ RUN \
   make && \
   make install && \
   ldconfig && \
-  sed -i 's|</applications>|  <application title="nomacs \| Image Lounge" type="normal">\n    <maximized>yes</maximized>\n  </application>\n</applications>|' /etc/xdg/openbox/rc.xml && \
   echo "**** clean up ****" && \
   apt-get purge --auto-remove -y \
     build-essential \

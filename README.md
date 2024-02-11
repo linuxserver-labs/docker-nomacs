@@ -38,11 +38,11 @@ Find us at:
 
 [nomacs](https://github.com/nomacs/nomacs) is a free, open source image viewer, which supports multiple platforms. You can use it for viewing all common image formats including RAW and psd images.
 
-[![nomacs](https://nomacs.org/startpage/nomacs.svg)](https://github.com/nomacs/nomacs)
+[![nomacs](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/nomacs-logo.png)](https://github.com/nomacs/nomacs)
 
 ## Supported Architectures
 
-Our images support multiple architectures such as `x86-64`, `arm64` and `armhf`. We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here](https://blog.linuxserver.io/2019/02/21/the-lsio-pipeline-project/).
+Our images support multiple architectures such as `x86-64` and `arm64`. We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here](https://blog.linuxserver.io/2019/02/21/the-lsio-pipeline-project/).
 
 Simply pulling `lscr.io/linuxserver-labs/nomacs:latest` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
 
@@ -52,7 +52,6 @@ The architectures supported by this image are:
 | :----: | :----: | ---- |
 | x86-64 | ✅ | latest |
 | arm64 | ✅ | latest |
-| armhf | ✅ | latest |
 
 ## Application Setup
 
