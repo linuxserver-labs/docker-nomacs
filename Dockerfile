@@ -12,6 +12,10 @@ ENV \
   TITLE="nomacs"
 
 RUN \
+  echo "**** add icon ****" && \
+  curl -o \
+    /kclient/public/icon.png \
+    https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/nomacs-logo.png && \
   echo "**** install build dependencies ****" && \
   apt-get update && \
   apt-get install -y --no-install-recommends \
@@ -68,7 +72,6 @@ RUN \
   make && \
   make install && \
   ldconfig && \
-  sed -i 's|</applications>|  <application title="nomacs \| Image Lounge" type="normal">\n    <maximized>yes</maximized>\n  </application>\n</applications>|' /etc/xdg/openbox/rc.xml && \
   echo "**** clean up ****" && \
   apt-get purge --auto-remove -y \
     build-essential \
