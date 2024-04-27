@@ -7,12 +7,11 @@ on:
 
 jobs:
   call-workflow:
-    uses: linuxserver-labs/docker-actions/.github/workflows/check-and-release.yml@v6
+    uses: linuxserver-labs/docker-actions/.github/workflows/check-and-release.yml@v7.0.2
     with:
       repo_owner: ${{ github.repository_owner }}
       app_name: "nomacs"
       release_type: "github_commit"
       release_url: "https://api.github.com/repos/nomacs/nomacs/commits/master"
-      release_name: ""
     secrets:
       repo_release_token: ${{ secrets.repo_release_token }}
