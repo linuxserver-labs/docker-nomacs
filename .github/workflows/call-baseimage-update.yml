@@ -11,7 +11,7 @@ jobs:
     with:
       repo_owner: ${{ github.repository_owner }}
       baseimage: "kasmvnc"
-      basebranch: "ubuntujammy"
+      basebranch: "ubuntunoble"
       app_name: "nomacs"
     secrets:
       repo_release_token: ${{ secrets.repo_release_token }}
