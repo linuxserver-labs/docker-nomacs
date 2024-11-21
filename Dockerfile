@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-kasmvnc:ubuntujammy
+FROM ghcr.io/linuxserver/baseimage-kasmvnc:ubuntunoble
 
 ARG BUILD_DATE
 ARG VERSION
@@ -42,13 +42,13 @@ RUN \
     kimageformat-plugins \
     libexiv2-27 \
     libheif1 \
-    libopencv-core4.5d \
-    libopencv-imgproc4.5d \
-    libquazip5-1 \
-    libqt5concurrent5 \
-    libqt5printsupport5 \
+    libopencv-core406t64 \
+    libopencv-imgproc406t64 \
+    libquazip5-1t64 \
+    libqt5concurrent5t64 \
+    libqt5printsupport5t64 \
     libqt5svg5 \
-    libraw20 \
+    libraw23t64 \
     qt5-image-formats-plugins && \
   echo "**** compile heif plugin ****" && \
   mkdir -p /tmp/heif && \
@@ -72,6 +72,7 @@ RUN \
   make && \
   make install && \
   ldconfig && \
+  printf "Linuxserver.io version: ${VERSION}\nBuild-date: ${BUILD_DATE}" > /build_version && \
   echo "**** clean up ****" && \
   apt-get purge --auto-remove -y \
     build-essential \
