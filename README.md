@@ -55,37 +55,258 @@ The architectures supported by this image are:
 
 ## Application Setup
 
-The webui will be accessible at http://SERVERIP:3000 or https://SERVERIP:3001
+The webui will be accessible at https://SERVERIP:3001
 
-### Options in all KasmVNC based GUI containers
+### Strict reverse proxies
 
-This container is based on [Docker Baseimage KasmVNC](https://github.com/linuxserver/docker-baseimage-kasmvnc) which means there are additional environment variables and run configurations to enable or disable specific functionality.
+This image uses a self-signed certificate by default. This naturally means the scheme is `https`.
+If you are using a reverse proxy which validates certificates, you need to [disable this check for the container](https://docs.linuxserver.io/faq#strict-proxy).
 
-#### Optional environment variables
+**Modern GUI desktop apps may have compatibility issues with the latest Docker syscall restrictions. You can use Docker with the `--security-opt seccomp=unconfined` setting to allow these syscalls on hosts with older Kernels or libseccomp versions.**
+
+### Security
+
+>[!WARNING]
+>This container provides privileged access to the host system. Do not expose it to the Internet unless you have secured it properly.
+
+**HTTPS is required for full functionality.** Modern browser features such as WebCodecs, used for video and audio, will not function over an insecure HTTP connection.
+
+By default, this container has no authentication. The optional `CUSTOM_USER` and `PASSWORD` environment variables enable basic HTTP auth, which is suitable only for securing the container on a trusted local network. For internet exposure, we strongly recommend placing the container behind a reverse proxy, such as [SWAG](https://github.com/linuxserver/docker-swag), with a robust authentication mechanism.
+
+The web interface includes a terminal with passwordless `sudo` access. Any user with access to the GUI can gain root control within the container, install arbitrary software, and probe your local network.
+
+While not generally recommended, certain legacy environments specifically those with older hardware or outdated Linux distributions may require the deactivation of the standard seccomp profile to get containerized desktop software to run. This can be achieved by utilizing the `--security-opt seccomp=unconfined` parameter. It is critical to use this option only when absolutely necessary as it disables a key security layer of Docker, elevating the potential for container escape vulnerabilities.
+
+### Options in all Selkies-based GUI containers
+
+This container is based on [Docker Baseimage Selkies](https://github.com/linuxserver/docker-baseimage-selkies), which provides the following environment variables and run configurations to customize its functionality.
+
+#### Optional Environment Variables
 
 | Variable | Description |
 | :----: | --- |
-| CUSTOM_PORT | Internal port the container listens on for http if it needs to be swapped from the default 3000. |
-| CUSTOM_HTTPS_PORT | Internal port the container listens on for https if it needs to be swapped from the default 3001. |
+| CUSTOM_PORT | Internal port the container listens on for http if it needs to be swapped from the default `8080` |
+| CUSTOM_HTTPS_PORT | Internal port the container listens on for https if it needs to be swapped from the default `8181` |
+| CUSTOM_WS_PORT | Internal port the container listens on for websockets if it needs to be swapped from the default 8082 |
 | CUSTOM_USER | HTTP Basic auth username, abc is default. |
+| DRI_NODE | Enable VAAPI stream encoding and use the specified device IE `/dev/dri/renderD128` |
+| DRINODE | Specify which GPU to use for DRI3 acceleration IE `/dev/dri/renderD129` |
 | PASSWORD | HTTP Basic auth password, abc is default. If unset there will be no auth |
 | SUBFOLDER | Subfolder for the application if running a subfolder reverse proxy, need both slashes IE `/subfolder/` |
-| TITLE | The page title displayed on the web browser, default "KasmVNC Client". |
-| FM_HOME | This is the home directory (landing) for the file manager, default "/config". |
-| START_DOCKER | If set to false a container with privilege will not automatically start the DinD Docker setup. |
-| DRINODE | If mounting in /dev/dri for [DRI3 GPU Acceleration](https://www.kasmweb.com/kasmvnc/docs/master/gpu_acceleration.html) allows you to specify the device to use IE `/dev/dri/renderD128` |
+| TITLE | The page title displayed on the web browser, default "Selkies" |
+| DASHBOARD | Allows the user to set their dashboard. Options: `selkies-dashboard`, `selkies-dashboard-zinc`, `selkies-dashboard-wish` |
+| FILE_MANAGER_PATH | Modifies the default upload/download file path, path must have proper permissions for abc user |
+| START_DOCKER | If set to false a container with privilege will not automatically start the DinD Docker setup |
+| DISABLE_IPV6 | If set to true or any value this will disable IPv6 |
+| LC_ALL | Set the Language for the container to run as IE `fr_FR.UTF-8` `ar_AE.UTF-8` |
+| NO_DECOR | If set the application will run without window borders for use as a PWA. (Decor can be enabled and disabled with Ctrl+Shift+d) |
+| NO_FULL | Do not autmatically fullscreen applications when using openbox. |
+| NO_GAMEPAD | Disable userspace gamepad interposer injection. |
+| DISABLE_ZINK | Do not set the Zink environment variables if a video card is detected (userspace applications will use CPU rendering) |
+| DISABLE_DRI3 | Do not use DRI3 acceleration if a video card is detected (userspace applications will use CPU rendering) |
+| MAX_RES | Pass a larger maximum resolution for the container default is 16k `15360x8640` |
+| WATERMARK_PNG | Full path inside the container to a watermark png IE `/usr/share/selkies/www/icon.png` |
+| WATERMARK_LOCATION | Where to paint the image over the stream integer options below |
 
-#### Optional run configurations
+**`WATERMARK_LOCATION` Options:**
+- **1**: Top Left
+- **2**: Top Right
+- **3**: Bottom Left
+- **4**: Bottom Right
+- **5**: Centered
+- **6**: Animated
+
+#### Optional Run Configurations
+
+| Argument | Description |
+| :----: | --- |
+| `--privileged` | Starts a Docker-in-Docker (DinD) environment. For better performance, mount the Docker data directory from the host, e.g., `-v /path/to/docker-data:/var/lib/docker`. |
+| `-v /var/run/docker.sock:/var/run/docker.sock` | Mounts the host's Docker socket to manage host containers from within this container. |
+| `--device /dev/dri:/dev/dri` | Mount a GPU into the container, this can be used in conjunction with the `DRINODE` environment variable to leverage a host video card for GPU accelerated applications. Only **Open Source** drivers are supported IE (Intel,AMDGPU,Radeon,ATI,Nouveau) |
+
+### Language Support - Internationalization
+
+To launch the desktop session in a different language, set the `LC_ALL` environment variable. For example:
+
+*   `-e LC_ALL=zh_CN.UTF-8` - Chinese
+*   `-e LC_ALL=ja_JP.UTF-8` - Japanese
+*   `-e LC_ALL=ko_KR.UTF-8` - Korean
+*   `-e LC_ALL=ar_AE.UTF-8` - Arabic
+*   `-e LC_ALL=ru_RU.UTF-8` - Russian
+*   `-e LC_ALL=es_MX.UTF-8` - Spanish (Latin America)
+*   `-e LC_ALL=de_DE.UTF-8` - German
+*   `-e LC_ALL=fr_FR.UTF-8` - French
+*   `-e LC_ALL=nl_NL.UTF-8` - Netherlands
+*   `-e LC_ALL=it_IT.UTF-8` - Italian
+
+### DRI3 GPU Acceleration
+
+For accelerated apps or games, render devices can be mounted into the container and leveraged by applications using:
+
+`--device /dev/dri:/dev/dri`
+
+This feature only supports **Open Source** GPU drivers:
+
+| Driver | Description |
+| :----: | --- |
+| Intel | i965 and i915 drivers for Intel iGPU chipsets |
+| AMD | AMDGPU, Radeon, and ATI drivers for AMD dedicated or APU chipsets |
+| NVIDIA | nouveau2 drivers only, closed source NVIDIA drivers lack DRI3 support |
+
+The `DRINODE` environment variable can be used to point to a specific GPU.
+
+DRI3 will work on aarch64 given the correct drivers are installed inside the container for your chipset.
+
+### Application Management
+
+There are two methods for installing applications inside the container: PRoot Apps (recommended for persistence) and Native Apps.
+
+#### PRoot Apps (Persistent)
+
+Natively installed packages (e.g., via `apt-get install`) will not persist if the container is recreated. To retain applications and their settings across container updates, we recommend using [proot-apps](https://github.com/linuxserver/proot-apps). These are portable applications installed to the user's persistent `$HOME` directory.
+
+To install an application, use the command line inside the container:
+
+```
+proot-apps install filezilla
+```
+
+A list of supported applications is available [here](https://github.com/linuxserver/proot-apps?tab=readme-ov-file#supported-apps).
+
+#### Native Apps (Non-Persistent)
+
+You can install packages from the system's native repository using the [universal-package-install](https://github.com/linuxserver/docker-mods/tree/universal-package-install) mod. This method will increase the container's start time and is not persistent. Add the following to your `compose.yaml`:
+
+```yaml
+  environment:
+    - DOCKER_MODS=linuxserver/mods:universal-package-install
+    - INSTALL_PACKAGES=libfuse2|git|gdb
+```
+
+#### Hardening
+
+These variables can be used to lock down the desktop environment for single-application use cases or to restrict user capabilities.
+
+##### Meta Variables
+
+These variables act as presets, enabling multiple hardening options at once. Individual options can still be set to override the preset.
 
 | Variable | Description |
 | :----: | --- |
-| `--privileged` | Will start a Docker in Docker (DinD) setup inside the container to use docker in an isolated environment. For increased performance mount the Docker directory inside the container to the host IE `-v /home/user/docker-data:/var/lib/docker`. |
-| `-v /var/run/docker.sock:/var/run/docker.sock` | Mount in the host level Docker socket to either interact with it via CLI or use Docker enabled applications. |
-| `--device /dev/dri:/dev/dri` | Mount a GPU into the container, this can be used in conjunction with the `DRINODE` environment variable to leverage a host video card for GPU accelerated appplications. Only **Open Source** drivers are supported IE (Intel,AMDGPU,Radeon,ATI,Nouveau) |
+| **`HARDEN_DESKTOP`** | Enables `DISABLE_OPEN_TOOLS`, `DISABLE_SUDO`, and `DISABLE_TERMINALS`. Also sets related Selkies UI settings (`SELKIES_FILE_TRANSFERS`, `SELKIES_COMMAND_ENABLED`, `SELKIES_UI_SIDEBAR_SHOW_FILES`, `SELKIES_UI_SIDEBAR_SHOW_APPS`) if they are not explicitly set by the user. |
+| **`HARDEN_OPENBOX`** | Enables `DISABLE_CLOSE_BUTTON`, `DISABLE_MOUSE_BUTTONS`, and `HARDEN_KEYBINDS`. It also flags `RESTART_APP` if not set by the user, ensuring the primary application is automatically restarted if closed. |
 
-### Lossless mode
+##### Individual Hardening Variables
 
-This container is capable of delivering a true lossless image at a high framerate to your web browser by changing the Stream Quality preset to "Lossless", more information [here](https://www.kasmweb.com/docs/latest/how_to/lossless.html#technical-background). In order to use this mode from a non localhost endpoint the HTTPS port on 3001 needs to be used. If using a reverse proxy to port 3000 specific headers will need to be set as outlined [here](https://github.com/linuxserver/docker-baseimage-kasmvnc#lossless).
+| Variable | Description |
+| :--- | --- |
+| **`DISABLE_OPEN_TOOLS`** | If true, disables `xdg-open` and `exo-open` binaries by removing their execute permissions. |
+| **`DISABLE_SUDO`** | If true, disables the `sudo` command by removing its execute permissions and invalidating the passwordless sudo configuration. |
+| **`DISABLE_TERMINALS`** | If true, disables common terminal emulators by removing their execute permissions and hiding them from the Openbox right-click menu. |
+| **`DISABLE_CLOSE_BUTTON`** | If true, removes the close button from window title bars in the Openbox window manager. |
+| **`DISABLE_MOUSE_BUTTONS`** | If true, disables the right-click and middle-click context menus and actions within the Openbox window manager. |
+| **`HARDEN_KEYBINDS`** | If true, disables default Openbox keybinds that can bypass other hardening options (e.g., `Alt+F4` to close windows, `Alt+Escape` to show the root menu). |
+| **`RESTART_APP`** | If true, enables a watchdog service that automatically restarts the main application if it is closed. The user's autostart script is made read-only and root owned to prevent tampering. |
+
+#### Selkies application settings
+
+Using environment variables every facet of the application can be configured.
+
+##### Booleans and Locking
+Boolean settings accept `true` or `false`. You can also prevent the user from changing a boolean setting in the UI by appending `|locked`. The UI toggle for this setting will be hidden.
+
+*   **Example**: To force CPU encoding on and prevent the user from disabling it:
+    ```bash
+    -e SELKIES_USE_CPU="true|locked"
+    ```
+
+##### Enums and Lists
+These settings accept a comma-separated list of values. Their behavior depends on the number of items provided:
+
+*   **Multiple Values**: The first item in the list becomes the default selection, and all items in the list become the available options in the UI dropdown.
+*   **Single Value**: The provided value becomes the default, and the UI dropdown is hidden because the choice is locked.
+
+*   **Example**: Force the encoder to be `jpeg` with no other options available to the user:
+    ```bash
+    -e SELKIES_ENCODER="jpeg"
+    ```
+
+##### Ranges
+Range settings define a minimum and maximum for a value (e.g., framerate).
+
+*   **To set a range**: Use a hyphen-separated `min-max` format. The UI will show a slider.
+*   **To set a fixed value**: Provide a single number. This will lock the value and hide the UI slider.
+
+*   **Example**: Lock the framerate to exactly 60 FPS.
+    ```bash
+    -e SELKIES_FRAMERATE="60"
+    ```
+
+##### Manual Resolution Mode
+The server can be forced to use a single, fixed resolution for all connecting clients. This mode is automatically activated if `SELKIES_MANUAL_WIDTH`, `SELKIES_MANUAL_HEIGHT`, or `SELKIES_IS_MANUAL_RESOLUTION_MODE` is set.
+
+*   If `SELKIES_MANUAL_WIDTH` and/or `SELKIES_MANUAL_HEIGHT` are set, the resolution is locked to those values.
+*   If `SELKIES_IS_MANUAL_RESOLUTION_MODE` is set to `true` without specifying width or height, the resolution defaults to **1024x768**.
+*   When this mode is active, the client UI for changing resolution is disabled.
+
+| Environment Variable | Default Value | Description |
+| --- | --- | --- |
+| `SELKIES_UI_TITLE` | `'Selkies'` | Title in top left corner of sidebar. |
+| `SELKIES_UI_SHOW_LOGO` | `True` | Show the Selkies logo in the sidebar. |
+| `SELKIES_UI_SHOW_SIDEBAR` | `True` | Show the main sidebar UI. |
+| `SELKIES_UI_SHOW_CORE_BUTTONS` | `True` | Show the core components buttons display, audio, microphone, and gamepad. |
+| `SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS` | `True` | Show the video settings section in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS` | `True` | Show the screen settings section in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS` | `True` | Show the audio settings section in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_STATS` | `True` | Show the stats section in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD` | `True` | Show the clipboard section in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_FILES` | `True` | Show the file transfer section in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_APPS` | `True` | Show the applications section in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_SHARING` | `True` | Show the sharing section in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_GAMEPADS` | `True` | Show the gamepads section in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN` | `True` | Show the fullscreen button in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE` | `True` | Show the gaming mode button in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_TRACKPAD` | `True` | Show the virtual trackpad button in the sidebar. |
+| `SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON` | `True` | Show the on-screen keyboard button in the display area. |
+| `SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS` | `True` | Show the soft buttons section in the sidebar. |
+| `SELKIES_AUDIO_ENABLED` | `True` | Enable server-to-client audio streaming. |
+| `SELKIES_MICROPHONE_ENABLED` | `True` | Enable client-to-server microphone forwarding. |
+| `SELKIES_GAMEPAD_ENABLED` | `True` | Enable gamepad support. |
+| `SELKIES_CLIPBOARD_ENABLED` | `True` | Enable clipboard synchronization. |
+| `SELKIES_COMMAND_ENABLED` | `True` | Enable parsing of command websocket messages. |
+| `SELKIES_FILE_TRANSFERS` | `'upload,download'` | Allowed file transfer directions (comma-separated: "upload,download"). Set to "" or "none" to disable. |
+| `SELKIES_ENCODER` | `'x264enc,x264enc-striped,jpeg'` | The default video encoders. |
+| `SELKIES_FRAMERATE` | `'8-120'` | Allowed framerate range or a fixed value. |
+| `SELKIES_H264_CRF` | `'5-50'` | Allowed H.264 CRF range or a fixed value. |
+| `SELKIES_JPEG_QUALITY` | `'1-100'` | Allowed JPEG quality range or a fixed value. |
+| `SELKIES_H264_FULLCOLOR` | `False` | Enable H.264 full color range for pixelflux encoders. |
+| `SELKIES_H264_STREAMING_MODE` | `False` | Enable H.264 streaming mode for pixelflux encoders. |
+| `SELKIES_USE_CPU` | `False` | Force CPU-based encoding for pixelflux. |
+| `SELKIES_USE_PAINT_OVER_QUALITY` | `True` | Enable high-quality paint-over for static scenes. |
+| `SELKIES_PAINT_OVER_JPEG_QUALITY` | `'1-100'` | Allowed JPEG paint-over quality range or a fixed value. |
+| `SELKIES_H264_PAINTOVER_CRF` | `'5-50'` | Allowed H.264 paint-over CRF range or a fixed value. |
+| `SELKIES_H264_PAINTOVER_BURST_FRAMES` | `'1-30'` | Allowed H.264 paint-over burst frames range or a fixed value. |
+| `SELKIES_SECOND_SCREEN` | `True` | Enable support for a second monitor/display. |
+| `SELKIES_AUDIO_BITRATE` | `'320000'` | The default audio bitrate. |
+| `SELKIES_IS_MANUAL_RESOLUTION_MODE` | `False` | Lock the resolution to the manual width/height values. |
+| `SELKIES_MANUAL_WIDTH` | `0` | Lock width to a fixed value. Setting this forces manual resolution mode. |
+| `SELKIES_MANUAL_HEIGHT` | `0` | Lock height to a fixed value. Setting this forces manual resolution mode. |
+| `SELKIES_SCALING_DPI` | `'96'` | The default DPI for UI scaling. |
+| `SELKIES_ENABLE_BINARY_CLIPBOARD` | `False` | Allow binary data on the clipboard. |
+| `SELKIES_USE_BROWSER_CURSORS` | `False` | Use browser CSS cursors instead of rendering to canvas. |
+| `SELKIES_USE_CSS_SCALING` | `False` | HiDPI when false, if true a lower resolution is sent from the client and the canvas is stretched. |
+| `SELKIES_PORT` (or `CUSTOM_WS_PORT`) | `8082` | Port for the data websocket server. |
+| `SELKIES_DRI_NODE` (or `DRI_NODE`) | `''` | Path to the DRI render node for VA-API. |
+| `SELKIES_AUDIO_DEVICE_NAME` | `'output.monitor'` | Audio device name for pcmflux capture. |
+| `SELKIES_WATERMARK_PATH` (or `WATERMARK_PNG`) | `''` | Absolute path to the watermark PNG file. |
+| `SELKIES_WATERMARK_LOCATION` (or `WATERMARK_LOCATION`) | `-1` | Watermark location enum (0-6). |
+| `SELKIES_DEBUG` | `False` | Enable debug logging. |
+| `SELKIES_ENABLE_SHARING` | `True` | Master toggle for all sharing features. |
+| `SELKIES_ENABLE_COLLAB` | `True` | Enable collaborative (read-write) sharing link. |
+| `SELKIES_ENABLE_SHARED` | `True` | Enable view-only sharing links. |
+| `SELKIES_ENABLE_PLAYER2` | `True` | Enable sharing link for gamepad player 2. |
+| `SELKIES_ENABLE_PLAYER3` | `True` | Enable sharing link for gamepad player 3. |
+| `SELKIES_ENABLE_PLAYER4` | `True` | Enable sharing link for gamepad player 4. |
 
 ## Usage
 
@@ -100,8 +321,6 @@ services:
   nomacs:
     image: lscr.io/linuxserver-labs/nomacs:latest
     container_name: nomacs
-    security_opt:
-      - seccomp:unconfined #optional
     environment:
       - PUID=1000
       - PGID=1000
@@ -119,7 +338,6 @@ services:
 ```bash
 docker run -d \
   --name=nomacs \
-  --security-opt seccomp=unconfined `#optional` \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/London \
@@ -139,10 +357,9 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-e PUID=1000` | for UserID - see below for explanation |
 | `-e PGID=1000` | for GroupID - see below for explanation |
 | `-e TZ=Europe/London` | Specify a timezone to use EG Europe/London. |
-| `-p 3000` | The webui http port. |
+| `-p 3000` | The webui http port (reverse proxy only). |
 | `-p 3001` | The webui https port. |
 | `-v /config` | The folder on host you'd like the app data to reside in. |
-| `--security-opt seccomp=unconfined` | For Docker Engine only, many modern gui apps need this to function as syscalls are unkown to Docker. |
 
 ## Environment variables from files (Docker secrets)
 
@@ -211,21 +428,6 @@ Below are the instructions for updating containers:
 * Recreate a new container with the same docker run parameters as instructed above (if mapped correctly to a host folder, your `/config` folder and settings will be preserved)
 * You can also remove the old dangling images: `docker image prune`
 
-### Via Watchtower auto-updater (only use if you don't remember the original parameters)
-
-* Pull the latest image at its tag and replace it with the same env variables in one run:
-
-  ```bash
-  docker run --rm \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  containrrr/watchtower \
-  --run-once nomacs
-  ```
-
-* You can also remove the old dangling images: `docker image prune`
-
-**Note:** We do not endorse the use of Watchtower as a solution to automated updates of existing Docker containers. In fact we generally discourage automated updates. However, this is a useful tool for one-time manual updates of containers where you have forgotten the original parameters. In the long term, we highly recommend using [Docker Compose](https://docs.linuxserver.io/general/docker-compose).
-
 ### Image Update Notifications - Diun (Docker Image Update Notifier)
 
 * We recommend [Diun](https://crazymax.dev/diun/) for update notifications. Other tools that automatically update containers unattended are not recommended or supported.
@@ -253,6 +455,7 @@ Once registered you can define the dockerfile to use with `-f Dockerfile.aarch64
 
 ## Versions
 
+* **14.11.25:** - Rebase to selkies. Potential breaking change: HTTPS is now required. You can either use a reverse proxy, or access with https on port 3001.
 * **20.11.24:** - Rebase to noble.
 * **11.02.24:** - Add PWA icon, rely on baseimage's fullscreen fix.
 * **10.05.23:** - Build commits from upstream master branch.

@@ -10,7 +10,7 @@ jobs:
     uses: linuxserver-labs/docker-actions/.github/workflows/check-baseimage-update.yml@v7.1.0
     with:
       repo_owner: ${{ github.repository_owner }}
-      baseimage: "kasmvnc"
+      baseimage: "selkies"
       basebranch: "ubuntunoble"
       app_name: "nomacs"
     secrets:

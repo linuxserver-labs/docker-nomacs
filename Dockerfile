@@ -1,4 +1,6 @@
-FROM ghcr.io/linuxserver/baseimage-kasmvnc:ubuntunoble
+# syntax=docker/dockerfile:1
+
+FROM ghcr.io/linuxserver/baseimage-selkies:ubuntunoble
 
 ARG BUILD_DATE
 ARG VERSION
@@ -14,7 +16,7 @@ ENV \
 RUN \
   echo "**** add icon ****" && \
   curl -o \
-    /kclient/public/icon.png \
+    /usr/share/selkies/www/icon.png \
     https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/nomacs-logo.png && \
   echo "**** install build dependencies ****" && \
   apt-get update && \
